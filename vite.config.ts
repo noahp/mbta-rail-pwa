@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === 'build' && process.env.GITHUB_ACTIONS ? '/mbta-rail-pwa/' : '/',
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -32,4 +33,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));

@@ -114,7 +114,7 @@ async function loadRouteData(routeId: string) {
 }
 
 async function fetchSchedules(routeId: string, date: string) {
-  const { schedules, trips, stops } = await api.getSchedulesForRoute(routeId, date, nowHHMM(-15));
+  const { schedules, trips, stops } = await api.getSchedulesForRoute(routeId, date, nowHHMM(-180));
   schedCache.set(routeId, {
     schedules,
     trips: new Map(trips.map(t => [t.id, t])),
@@ -173,7 +173,12 @@ async function loadTripSchedule(tripId: string) {
 
 function startPolling() {
   if (pollTimer) return;
-  pollTimer = window.setInterval(() => void pollAll(), 10_000);
+  pollTimer = window.setInterval(() => void pollAll(), (prefs.refreshInterval ?? 10) * 1000);
+}
+
+function restartPolling() {
+  stopPolling();
+  startPolling();
 }
 
 function stopPolling() {
@@ -270,7 +275,9 @@ function buildTripList(routeId: string): TripDisplay[] {
       scheds[0]?.attributes.departure_time ??
       null;
 
-    if (isPast(originTime) && !ssPred?.attributes.track) continue;
+    // Skip trips with no active predictions and a past origin (fully completed)
+    const hasActivePreds = preds.length > 0;
+    if (isPast(originTime) && !hasActivePreds) continue;
 
     result.push({
       tripId,
@@ -610,7 +617,7 @@ function renderSettings() {
 
   panel.innerHTML = `
 <div class="settings-overlay" data-action="close-settings">
-  <div class="settings-sheet" onclick="event.stopPropagation()">
+  <div class="settings-sheet">
     <div class="settings-handle"></div>
     <h2>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -631,12 +638,28 @@ function renderSettings() {
     />
     <p class="field-hint">
       Get a free key at <a href="https://api-v3.mbta.com/" target="_blank" rel="noopener">api-v3.mbta.com</a>
-      (takes ~1 day). Without a key, you're limited to 20 requests/min.
+      (takes ~1 day). Without a key you're limited to 20 req/min.
       Polling pauses automatically when the tab is hidden.
     </p>
+
+    <label class="field-label" style="margin-top:18px;display:block">Refresh Interval</label>
+    <div class="interval-btns">
+      ${[5, 10, 30, 60].map(s => `
+        <button class="interval-btn${prefs.refreshInterval === s ? ' active' : ''}"
+                data-action="set-interval" data-interval="${s}">
+          ${s < 60 ? `${s}s` : '1 min'}
+        </button>`).join('')}
+    </div>
+
     <div class="settings-actions">
       <button class="btn-primary" data-action="save-settings">Done</button>
     </div>
+    <a class="github-link" href="https://github.com/noahp/mbta-rail-pwa" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/>
+      </svg>
+      noahp/mbta-rail-pwa
+    </a>
   </div>
 </div>`;
 }
@@ -665,6 +688,8 @@ function attachDelegation() {
         break;
 
       case 'close-settings':
+        // Only close when clicking the backdrop, not inside the sheet
+        if ((e.target as HTMLElement).closest('.settings-sheet')) break;
         showSettings = false;
         renderSettings();
         break;
@@ -747,6 +772,15 @@ function attachDelegation() {
         else list.push(stopId);
         savePrefs(prefs);
         renderRoutes();
+        break;
+      }
+
+      case 'set-interval': {
+        const secs = parseInt(el.dataset.interval ?? '10', 10);
+        prefs.refreshInterval = secs;
+        savePrefs(prefs);
+        restartPolling();
+        renderSettings();
         break;
       }
 

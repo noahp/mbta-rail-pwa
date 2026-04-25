@@ -72,6 +72,7 @@ export interface Prefs {
   apiKey: string;
   favoriteRoutes: string[];
   favoriteStops: Record<string, string[]>;
+  refreshInterval: number; // seconds
 }
 
 export interface TripDisplay {

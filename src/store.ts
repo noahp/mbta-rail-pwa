@@ -6,6 +6,7 @@ const defaults: Prefs = {
   apiKey: '',
   favoriteRoutes: [],
   favoriteStops: {},
+  refreshInterval: 10,
 };
 
 export function loadPrefs(): Prefs {

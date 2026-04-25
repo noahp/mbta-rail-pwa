@@ -241,6 +241,44 @@ button {
 .btn-primary:hover { background: var(--purple-mid); }
 .btn-primary:active { background: var(--purple-dark); }
 
+.interval-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.interval-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-mid);
+  background: var(--surface-raised);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.interval-btn:hover { border-color: var(--purple-light); color: var(--purple); }
+.interval-btn.active {
+  border-color: var(--purple);
+  background: var(--purple-xlight);
+  color: var(--purple);
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 20px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.github-link:hover { color: var(--text); }
+.github-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+
 .btn-secondary {
   background: var(--purple-xlight);
   color: var(--purple);
