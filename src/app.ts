@@ -156,7 +156,7 @@ async function loadTripSchedule(tripId: string) {
         .sort((a, b) => a.attributes.stop_sequence - b.attributes.stop_sequence)
         .map(s => ({
           stopId: s.relationships.stop.data?.id ?? '',
-          stopName: stopMap.get(s.relationships.stop.data?.id ?? '')?.attributes.name ?? '—',
+          stopName: stopMap.get(s.relationships.stop.data?.id ?? '')?.attributes.name ?? '-',
           sequence: s.attributes.stop_sequence,
           scheduled: s.attributes.departure_time,
         })),
@@ -596,7 +596,7 @@ function renderStatus() {
   const noKey = !prefs.apiKey;
   const updatedText = lastRefreshed
     ? `Updated ${relativeTime(lastRefreshed)}`
-    : noKey ? 'No API key — limited to 20 req/min' : 'Awaiting data…';
+    : noKey ? 'No API key - limited to 20 req/min' : 'Awaiting data…';
 
   bar.innerHTML = `
 <span class="status-text">${escHtml(updatedText)}</span>

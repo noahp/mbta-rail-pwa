@@ -1,17 +1,17 @@
 # MBTA Commuter Rail
 
-A real-time Progressive Web App for tracking MBTA Commuter Rail trains — built for daily commuters who want live departure times, track numbers, and service alerts without opening the full MBTA site.
+A real-time Progressive Web App for tracking MBTA Commuter Rail trains - built for daily commuters who want live departure times, track numbers, and service alerts without opening the full MBTA site.
 
 **Live:** https://noahp.github.io/mbta-rail-pwa/
 
 ## Features
 
-- **Favorite lines** — pinned to the top of the list
-- **Favorite stops** — highlighted gold in the stop list; tap any stop to toggle
-- **Live predictions** — departure times updated on a configurable interval (5s–1 min)
-- **Track numbers** — shown when the MBTA assigns them (~30–60 min before departure at South/North Station)
-- **Service alerts** — active alerts for your favorited routes, sorted by severity
-- **Installable PWA** — works offline for cached data; add to home screen on iOS/Android
+- **Favorite lines** - pinned to the top of the list
+- **Favorite stops** - highlighted gold in the stop list; tap any stop to toggle
+- **Live predictions** - departure times updated on a configurable interval (5s–1 min)
+- **Track numbers** - shown when the MBTA assigns them (~30–60 min before departure at South/North Station)
+- **Service alerts** - active alerts for your favorited routes, sorted by severity
+- **Installable PWA** - works offline for cached data; add to home screen on iOS/Android
 
 ## Setup
 
