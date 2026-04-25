@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#7B388C"/>
+  <!-- Train body -->
+  <rect x="80" y="150" width="352" height="230" rx="40" fill="white"/>
+  <!-- Windows -->
+  <rect x="110" y="185" width="100" height="75" rx="10" fill="#7B388C"/>
+  <rect x="240" y="185" width="100" height="75" rx="10" fill="#7B388C"/>
+  <!-- Center stripe / door area -->
+  <rect x="211" y="270" width="90" height="110" rx="6" fill="#9B58AC"/>
+  <!-- Wheels -->
+  <circle cx="155" cy="415" r="42" fill="white"/>
+  <circle cx="357" cy="415" r="42" fill="white"/>
+  <circle cx="155" cy="415" r="18" fill="#7B388C"/>
+  <circle cx="357" cy="415" r="18" fill="#7B388C"/>
+  <!-- Axle connectors -->
+  <rect x="155" y="378" width="202" height="8" rx="4" fill="white"/>
+  <!-- Headlight -->
+  <circle cx="432" cy="265" r="18" fill="#FFD700"/>
+  <!-- Bottom bar / rail -->
+  <rect x="60" y="440" width="392" height="20" rx="10" fill="rgba(255,255,255,0.35)"/>
+</svg>
