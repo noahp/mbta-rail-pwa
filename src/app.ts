@@ -1,10 +1,25 @@
 import { MbtaApi } from './api';
 import { loadPrefs, savePrefs } from './store';
-import { formatTime, countdown, isPast, todayString, nowHHMM, relativeTime, escHtml } from './utils';
 import type {
-  Prefs, MbtaRoute, MbtaStop, MbtaTrip, MbtaPrediction, MbtaSchedule,
-  MbtaAlert, TripDisplay, StopTimeDisplay,
+  MbtaAlert,
+  MbtaPrediction,
+  MbtaRoute,
+  MbtaSchedule,
+  MbtaStop,
+  MbtaTrip,
+  Prefs,
+  StopTimeDisplay,
+  TripDisplay,
 } from './types';
+import {
+  countdown,
+  escHtml,
+  formatTime,
+  isPast,
+  nowHHMM,
+  relativeTime,
+  todayString,
+} from './utils';
 
 // ── Singletons / state ────────────────────────────────────────────────────
 
@@ -72,10 +87,7 @@ export async function init() {
   renderRoutes();
 
   // Load data for expanded routes + initial alerts in parallel
-  await Promise.all([
-    ...[...expandedRoutes].map(loadRouteData),
-    fetchAlerts(),
-  ]);
+  await Promise.all([...[...expandedRoutes].map(loadRouteData), fetchAlerts()]);
   renderRoutes();
   renderStatus();
   renderTabBar();
@@ -84,7 +96,10 @@ export async function init() {
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopPolling();
-    else { void pollAll(); startPolling(); }
+    else {
+      void pollAll();
+      startPolling();
+    }
   });
 }
 
@@ -99,7 +114,7 @@ async function loadRouteData(routeId: string) {
 
   const [, predResult] = await Promise.allSettled([
     // Only re-fetch schedules if stale (different day)
-    (cached?.date === today ? Promise.resolve() : fetchSchedules(routeId, today)),
+    cached?.date === today ? Promise.resolve() : fetchSchedules(routeId, today),
     fetchPredictions(routeId),
   ]);
 
@@ -117,8 +132,8 @@ async function fetchSchedules(routeId: string, date: string) {
   const { schedules, trips, stops } = await api.getSchedulesForRoute(routeId, date, nowHHMM(-180));
   schedCache.set(routeId, {
     schedules,
-    trips: new Map(trips.map(t => [t.id, t])),
-    stops: new Map(stops.map(s => [s.id, s])),
+    trips: new Map(trips.map((t) => [t.id, t])),
+    stops: new Map(stops.map((s) => [s.id, s])),
     date,
   });
 }
@@ -127,14 +142,17 @@ async function fetchPredictions(routeId: string) {
   const { predictions, trips, stops } = await api.getPredictions(routeId);
   predCache.set(routeId, {
     predictions,
-    trips: new Map(trips.map(t => [t.id, t])),
-    stops: new Map(stops.map(s => [s.id, s])),
+    trips: new Map(trips.map((t) => [t.id, t])),
+    stops: new Map(stops.map((s) => [s.id, s])),
     fetchedAt: Date.now(),
   });
 }
 
 async function fetchAlerts() {
-  if (!prefs.favoriteRoutes.length) { alertCache = []; return; }
+  if (!prefs.favoriteRoutes.length) {
+    alertCache = [];
+    return;
+  }
   try {
     alertCache = await api.getAlerts(prefs.favoriteRoutes);
     alertsError = '';
@@ -150,11 +168,11 @@ async function loadTripSchedule(tripId: string) {
 
   try {
     const { schedules, stops } = await api.getSchedulesForTrip(tripId);
-    const stopMap = new Map(stops.map(s => [s.id, s]));
+    const stopMap = new Map(stops.map((s) => [s.id, s]));
     tripSchedCache.set(tripId, {
       stops: schedules
         .sort((a, b) => a.attributes.stop_sequence - b.attributes.stop_sequence)
-        .map(s => ({
+        .map((s) => ({
           stopId: s.relationships.stop.data?.id ?? '',
           stopName: stopMap.get(s.relationships.stop.data?.id ?? '')?.attributes.name ?? '-',
           sequence: s.attributes.stop_sequence,
@@ -182,7 +200,10 @@ function restartPolling() {
 }
 
 function stopPolling() {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
 }
 
 async function pollAll() {
@@ -190,7 +211,7 @@ async function pollAll() {
   renderStatus();
 
   await Promise.allSettled([
-    ...[...expandedRoutes].map(async id => {
+    ...[...expandedRoutes].map(async (id) => {
       try {
         await fetchPredictions(id);
         routeErrors.delete(id);
@@ -260,7 +281,7 @@ function buildTripList(routeId: string): TripDisplay[] {
     );
 
     // Find origin: prefer prediction departure from SS or first stop, else schedule
-    const ssPred = preds.find(p => {
+    const ssPred = preds.find((p) => {
       const sid = p.relationships.stop.data?.id;
       return sid && isSouthOrNorthStation(stopMap.get(sid)?.attributes.name ?? sid);
     });
@@ -271,9 +292,7 @@ function buildTripList(routeId: string): TripDisplay[] {
 
     // For origin time, use prediction if available, else schedule first stop
     const originTime =
-      originPred?.attributes.departure_time ??
-      scheds[0]?.attributes.departure_time ??
-      null;
+      originPred?.attributes.departure_time ?? scheds[0]?.attributes.departure_time ?? null;
 
     // Skip trips with no active predictions and a past origin (fully completed)
     const hasActivePreds = preds.length > 0;
@@ -287,7 +306,7 @@ function buildTripList(routeId: string): TripDisplay[] {
       originTime,
       track: ssPred?.attributes.track ?? originPred?.attributes.track ?? null,
       status: originPred?.attributes.status ?? null,
-      hasLiveData: preds.some(p => p.attributes.status !== null),
+      hasLiveData: preds.some((p) => p.attributes.status !== null),
     });
   }
 
@@ -316,7 +335,7 @@ function buildStopList(tripId: string, routeId: string): StopTimeDisplay[] | nul
 
   const favStops = new Set(prefs.favoriteStops[routeId] ?? []);
 
-  return tripSched.stops.map(s => {
+  return tripSched.stops.map((s) => {
     const p = predByStop.get(s.stopId);
     const effectiveTime = p?.attributes.departure_time ?? s.scheduled;
     return {
@@ -349,7 +368,8 @@ function renderRoutes() {
   }
 
   if (!routes.length) {
-    container.innerHTML = '<div class="loading-routes"><div class="spinner"></div><p>Loading routes…</p></div>';
+    container.innerHTML =
+      '<div class="loading-routes"><div class="spinner"></div><p>Loading routes…</p></div>';
     return;
   }
 
@@ -406,18 +426,23 @@ function renderTripList(routeId: string, isLoading: boolean, errMsg: string | un
     return '<div class="route-empty">No upcoming trains found</div>';
   }
 
-  return `<div class="trip-list">${trips.map(t => renderTripCard(t, routeId)).join('')}</div>`;
+  return `<div class="trip-list">${trips.map((t) => renderTripCard(t, routeId)).join('')}</div>`;
 }
 
 function renderTripCard(trip: TripDisplay, routeId: string): string {
   const isExpanded = expandedTrips.has(trip.tripId);
   const cd = countdown(trip.originTime);
-  const cdSoon = cd === 'Now' || (cd.endsWith('min') && parseInt(cd) <= 5);
+  const cdSoon = cd === 'Now' || (cd.endsWith('min') && parseInt(cd, 10) <= 5);
 
-  const statusClass = !trip.status ? '' :
-    /on.?time/i.test(trip.status) ? 'on-time' :
-    /delay/i.test(trip.status) ? 'delayed' :
-    /board|all.?aboard/i.test(trip.status) ? 'boarding' : 'other';
+  const statusClass = !trip.status
+    ? ''
+    : /on.?time/i.test(trip.status)
+      ? 'on-time'
+      : /delay/i.test(trip.status)
+        ? 'delayed'
+        : /board|all.?aboard/i.test(trip.status)
+          ? 'boarding'
+          : 'other';
 
   return `
 <div class="trip-card${isExpanded ? ' is-expanded' : ''}" data-trip-id="${escHtml(trip.tripId)}">
@@ -453,7 +478,7 @@ function renderStopList(tripId: string, routeId: string): string {
     return '<div class="stop-list-loading">Loading stops…</div>';
   }
 
-  const rows = stops.map(s => renderStopRow(s, routeId)).join('');
+  const rows = stops.map((s) => renderStopRow(s, routeId)).join('');
   return `
 <div class="stop-list">
   ${rows}
@@ -464,7 +489,7 @@ function renderStopList(tripId: string, routeId: string): string {
 function renderStopRow(s: StopTimeDisplay, routeId: string): string {
   const effectiveTime = s.predicted ?? s.scheduled;
   const cd = s.isPast ? '' : countdown(effectiveTime);
-  const cdSoon = cd === 'Now' || (cd.endsWith('min') && parseInt(cd) <= 5);
+  const cdSoon = cd === 'Now' || (cd.endsWith('min') && parseInt(cd, 10) <= 5);
 
   return `
 <div class="stop-row${s.isFavorite ? ' is-favorite' : ''}${s.isPast ? ' is-past' : ''}"
@@ -473,12 +498,15 @@ function renderStopRow(s: StopTimeDisplay, routeId: string): string {
   <div class="stop-name">${escHtml(s.stopName)}</div>
   ${s.track ? `<span class="stop-track">Trk ${escHtml(s.track)}</span>` : ''}
   <div class="stop-time-col">
-    ${s.predicted
-      ? `<span class="stop-time-pred">${formatTime(s.predicted)}</span>
-         ${s.scheduled && s.scheduled !== s.predicted
-           ? `<span class="stop-time-sched">${formatTime(s.scheduled)}</span>`
-           : ''}`
-      : `<span class="stop-time-sched">${formatTime(s.scheduled)}</span>`
+    ${
+      s.predicted
+        ? `<span class="stop-time-pred">${formatTime(s.predicted)}</span>
+         ${
+           s.scheduled && s.scheduled !== s.predicted
+             ? `<span class="stop-time-sched">${formatTime(s.scheduled)}</span>`
+             : ''
+         }`
+        : `<span class="stop-time-sched">${formatTime(s.scheduled)}</span>`
     }
     ${cd ? `<span class="stop-countdown${cdSoon ? ' soon' : ''}">${escHtml(cd)}</span>` : ''}
   </div>
@@ -547,7 +575,9 @@ function renderAlertsContainer() {
   const sorted = [...alertCache].sort((a, b) => {
     if (b.attributes.severity !== a.attributes.severity)
       return b.attributes.severity - a.attributes.severity;
-    return new Date(b.attributes.updated_at).getTime() - new Date(a.attributes.updated_at).getTime();
+    return (
+      new Date(b.attributes.updated_at).getTime() - new Date(a.attributes.updated_at).getTime()
+    );
   });
 
   el.innerHTML = sorted.map(renderAlertCard).join('');
@@ -565,13 +595,17 @@ function renderAlertCard(alert: MbtaAlert): string {
   const updated = relativeTime(new Date(alert.attributes.updated_at));
 
   // Look up affected route names from our in-memory routes list
-  const affectedRouteIds = alert.relationships?.routes?.data?.map(r => r.id) ?? [];
-  const affectedRoutes = routes.filter(r => affectedRouteIds.includes(r.id));
-  const routeChips = affectedRoutes.map(r => `
+  const affectedRouteIds = alert.relationships?.routes?.data?.map((r) => r.id) ?? [];
+  const affectedRoutes = routes.filter((r) => affectedRouteIds.includes(r.id));
+  const routeChips = affectedRoutes
+    .map(
+      (r) => `
 <span class="alert-route-chip">
   <span class="alert-route-swatch" style="background:#${r.attributes.color || '7B388C'}"></span>
   <span class="alert-route-name">${escHtml(r.attributes.short_name || r.attributes.long_name)}</span>
-</span>`).join('');
+</span>`,
+    )
+    .join('');
 
   return `
 <div class="alert-card ${sevClass}">
@@ -580,11 +614,15 @@ function renderAlertCard(alert: MbtaAlert): string {
     <span class="alert-effect-badge ${sevClass}">${escHtml(effectLabel)}</span>
   </div>
   <p class="alert-header">${escHtml(alert.attributes.header)}</p>
-  ${alert.attributes.description ? `
+  ${
+    alert.attributes.description
+      ? `
   <details class="alert-details">
     <summary>More info</summary>
     <p class="alert-desc">${escHtml(alert.attributes.description)}</p>
-  </details>` : ''}
+  </details>`
+      : ''
+  }
   <div class="alert-footer">Updated ${escHtml(updated)}</div>
 </div>`;
 }
@@ -596,7 +634,9 @@ function renderStatus() {
   const noKey = !prefs.apiKey;
   const updatedText = lastRefreshed
     ? `Updated ${relativeTime(lastRefreshed)}`
-    : noKey ? 'No API key - limited to 20 req/min' : 'Awaiting data…';
+    : noKey
+      ? 'No API key - limited to 20 req/min'
+      : 'Awaiting data…';
 
   bar.innerHTML = `
 <span class="status-text">${escHtml(updatedText)}</span>
@@ -613,7 +653,10 @@ function renderSettings() {
   const panel = document.getElementById('settings-panel');
   if (!panel) return;
 
-  if (!showSettings) { panel.innerHTML = ''; return; }
+  if (!showSettings) {
+    panel.innerHTML = '';
+    return;
+  }
 
   panel.innerHTML = `
 <div class="settings-overlay" data-action="close-settings">
@@ -644,11 +687,15 @@ function renderSettings() {
 
     <label class="field-label" style="margin-top:18px;display:block">Refresh Interval</label>
     <div class="interval-btns">
-      ${[5, 10, 30, 60].map(s => `
+      ${[5, 10, 30, 60]
+        .map(
+          (s) => `
         <button class="interval-btn${prefs.refreshInterval === s ? ' active' : ''}"
                 data-action="set-interval" data-interval="${s}">
           ${s < 60 ? `${s}s` : '1 min'}
-        </button>`).join('')}
+        </button>`,
+        )
+        .join('')}
     </div>
 
     <div class="settings-actions">
@@ -731,7 +778,10 @@ function attachDelegation() {
         savePrefs(prefs);
         renderRoutes();
         // Refresh alerts since favorites changed
-        void fetchAlerts().then(() => { renderTabBar(); if (activeTab === 'alerts') renderAlertsContainer(); });
+        void fetchAlerts().then(() => {
+          renderTabBar();
+          if (activeTab === 'alerts') renderAlertsContainer();
+        });
         break;
       }
 

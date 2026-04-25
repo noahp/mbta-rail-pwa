@@ -1,7 +1,7 @@
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return '-';
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return '-';
+  if (Number.isNaN(d.getTime())) return '-';
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
@@ -44,5 +44,9 @@ export function relativeTime(date: Date): string {
 }
 
 export function escHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

@@ -1,4 +1,11 @@
-import type { MbtaRoute, MbtaStop, MbtaTrip, MbtaPrediction, MbtaSchedule, MbtaAlert } from './types';
+import type {
+  MbtaAlert,
+  MbtaPrediction,
+  MbtaRoute,
+  MbtaSchedule,
+  MbtaStop,
+  MbtaTrip,
+} from './types';
 
 const BASE = 'https://api-v3.mbta.com';
 
@@ -32,7 +39,8 @@ export class MbtaApi {
   async getCommuterRailRoutes(): Promise<MbtaRoute[]> {
     const r = await this.get<MbtaRoute>('/routes', {
       'filter[type]': '2',
-      'fields[route]': 'long_name,short_name,color,text_color,direction_names,direction_destinations,sort_order',
+      'fields[route]':
+        'long_name,short_name,color,text_color,direction_names,direction_destinations,sort_order',
     });
     return r.data;
   }
@@ -44,8 +52,9 @@ export class MbtaApi {
   }> {
     const r = await this.get<MbtaPrediction>('/predictions', {
       'filter[route]': routeId,
-      'include': 'trip,stop',
-      'fields[prediction]': 'arrival_time,departure_time,direction_id,schedule_relationship,status,stop_sequence',
+      include: 'trip,stop',
+      'fields[prediction]':
+        'arrival_time,departure_time,direction_id,schedule_relationship,status,stop_sequence',
       'fields[trip]': 'headsign,name,direction_id',
       'fields[stop]': 'name,municipality',
     });
@@ -57,7 +66,11 @@ export class MbtaApi {
     };
   }
 
-  async getSchedulesForRoute(routeId: string, date: string, minTime: string): Promise<{
+  async getSchedulesForRoute(
+    routeId: string,
+    date: string,
+    minTime: string,
+  ): Promise<{
     schedules: MbtaSchedule[];
     trips: MbtaTrip[];
     stops: MbtaStop[];
@@ -66,7 +79,7 @@ export class MbtaApi {
       'filter[route]': routeId,
       'filter[date]': date,
       'filter[min_time]': minTime,
-      'include': 'trip,stop',
+      include: 'trip,stop',
       'fields[schedule]': 'departure_time,stop_sequence,direction_id',
       'fields[trip]': 'headsign,name,direction_id',
       'fields[stop]': 'name,municipality',
@@ -86,7 +99,7 @@ export class MbtaApi {
   }> {
     const r = await this.get<MbtaSchedule>('/schedules', {
       'filter[trip]': tripId,
-      'include': 'stop',
+      include: 'stop',
       'fields[schedule]': 'departure_time,arrival_time,stop_sequence',
       'fields[stop]': 'name,municipality',
     });
@@ -102,7 +115,8 @@ export class MbtaApi {
     const r = await this.get<MbtaAlert>('/alerts', {
       'filter[route]': routeIds.join(','),
       'filter[lifecycle]': 'NEW,ONGOING,ONGOING_UPCOMING',
-      'fields[alert]': 'header,description,effect,severity,service_effect,cause,updated_at,lifecycle,active_period',
+      'fields[alert]':
+        'header,description,effect,severity,service_effect,cause,updated_at,lifecycle,active_period',
     });
     return r.data;
   }
