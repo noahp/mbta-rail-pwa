@@ -10,8 +10,10 @@ alerts without opening the full MBTA site.
 
 <table>
   <tr>
-    <td><img src="screenshots/routes.png" alt="Route list" width="280"></td>
-    <td><img src="screenshots/trains.png" alt="Live train predictions" width="280"></td>
+    <td><img src="screenshots/routes.png" alt="Route list" width="240"></td>
+    <td><img src="screenshots/trains.png" alt="Live train predictions" width="240"></td>
+    <td><img src="screenshots/alerts.png" alt="Service alerts" width="240"></td>
+    <td><img src="screenshots/settings.png" alt="Settings panel" width="240"></td>
   </tr>
 </table>
 
