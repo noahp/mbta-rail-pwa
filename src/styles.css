@@ -54,6 +54,34 @@ button {
   padding: 0;
 }
 
+/* ── Update banner ──────────────────────────────────────── */
+
+#update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--purple-dark);
+  color: white;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+#update-banner[hidden] {
+  display: none;
+}
+
+#update-apply {
+  background: white;
+  color: var(--purple-dark);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
 /* ── Header ─────────────────────────────────────────────── */
 
 .app-header {
@@ -286,6 +314,23 @@ button {
 }
 .btn-primary:active {
   background: var(--purple-dark);
+}
+
+.btn-secondary {
+  background: var(--purple-xlight);
+  color: var(--purple-dark);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.btn-secondary:hover {
+  background: var(--border);
+}
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .interval-btns {

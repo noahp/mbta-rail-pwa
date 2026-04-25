@@ -5,7 +5,7 @@ export default defineConfig(({ command }) => ({
   base: command === 'build' && process.env.GITHUB_ACTIONS ? '/mbta-rail-pwa/' : '/',
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['icon.svg'],
       devOptions: { enabled: true },
       manifest: {

@@ -1,5 +1,5 @@
 import { MbtaApi } from './api';
-import { loadPrefs, savePrefs } from './store';
+import { clearSchedCache, loadPrefs, loadSchedCache, savePrefs, saveSchedCache } from './store';
 import type {
   MbtaAlert,
   MbtaPrediction,
@@ -59,6 +59,7 @@ const routeErrors = new Map<string, string>();
 let showSettings = false;
 let lastRefreshed: Date | null = null;
 let isRefreshing = false;
+let schedRefreshing = false;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let activeTab: 'trains' | 'alerts' = 'trains';
 let alertCache: MbtaAlert[] = [];
@@ -69,6 +70,20 @@ let alertsError = '';
 export async function init() {
   prefs = loadPrefs();
   api.setApiKey(prefs.apiKey);
+
+  // Preload persisted schedule caches for favorited routes so first render
+  // can show schedule-derived data (origin times) without waiting for the API.
+  for (const routeId of prefs.favoriteRoutes) {
+    const persisted = loadSchedCache(routeId);
+    if (persisted) {
+      schedCache.set(routeId, {
+        schedules: persisted.schedules,
+        trips: new Map(persisted.trips),
+        stops: new Map(persisted.stops),
+        date: persisted.date,
+      });
+    }
+  }
 
   attachDelegation();
   renderSettings();
@@ -112,29 +127,42 @@ async function loadRouteData(routeId: string) {
   const today = todayString();
   const cached = schedCache.get(routeId);
 
-  const [, predResult] = await Promise.allSettled([
-    // Only re-fetch schedules if stale (different day)
-    cached?.date === today ? Promise.resolve() : fetchSchedules(routeId, today),
-    fetchPredictions(routeId),
-  ]);
+  // Start schedule fetch in the background if stale; don't await it yet.
+  const schedPromise =
+    cached?.date === today
+      ? Promise.resolve()
+      : fetchSchedules(routeId, today).then(() => renderRoutes());
 
-  if (predResult.status === 'rejected') {
-    routeErrors.set(routeId, String(predResult.reason).slice(0, 100));
-  } else {
+  // Await only predictions — they're fast and unblock the UI.
+  try {
+    await fetchPredictions(routeId);
     routeErrors.delete(routeId);
+  } catch (e) {
+    routeErrors.set(routeId, String(e).slice(0, 100));
   }
 
   loadingRoutes.delete(routeId);
   lastRefreshed = new Date();
+  renderRoutes();
+
+  // Re-render once schedules arrive (fills in origin times).
+  schedPromise.catch(() => {});
 }
 
 async function fetchSchedules(routeId: string, date: string) {
   const { schedules, trips, stops } = await api.getSchedulesForRoute(routeId, date, nowHHMM(-180));
-  schedCache.set(routeId, {
+  const cache = {
     schedules,
     trips: new Map(trips.map((t) => [t.id, t])),
     stops: new Map(stops.map((s) => [s.id, s])),
     date,
+  };
+  schedCache.set(routeId, cache);
+  saveSchedCache(routeId, {
+    date: cache.date,
+    schedules: cache.schedules,
+    trips: [...cache.trips.entries()],
+    stops: [...cache.stops.entries()],
   });
 }
 
@@ -159,6 +187,25 @@ async function fetchAlerts() {
   } catch (e) {
     alertsError = e instanceof Error ? e.message : String(e);
   }
+}
+
+async function refreshSchedules() {
+  schedRefreshing = true;
+  renderSettings();
+
+  const today = todayString();
+  const routeIds = [...expandedRoutes];
+
+  for (const routeId of routeIds) {
+    schedCache.delete(routeId);
+    clearSchedCache(routeId);
+  }
+
+  await Promise.allSettled(routeIds.map((id) => fetchSchedules(id, today)));
+
+  schedRefreshing = false;
+  renderSettings();
+  renderRoutes();
 }
 
 async function loadTripSchedule(tripId: string) {
@@ -707,6 +754,15 @@ function renderSettings() {
         .join('')}
     </div>
 
+    <label class="field-label" style="margin-top:18px;display:block">Schedule Data</label>
+    <p class="field-hint" style="margin-bottom:8px">
+      Schedules are cached daily. Refresh if trains look wrong after a schedule change.
+    </p>
+    <button class="btn-secondary${schedRefreshing ? ' spinning' : ''}" data-action="refresh-schedules"
+            ${schedRefreshing ? 'disabled' : ''}>
+      ${schedRefreshing ? 'Refreshing…' : 'Refresh schedules'}
+    </button>
+
     <div class="settings-actions">
       <button class="btn-primary" data-action="save-settings">Done</button>
     </div>
@@ -755,6 +811,10 @@ function attachDelegation() {
         renderSettings();
         renderStatus();
         renderTabBar();
+        break;
+
+      case 'refresh-schedules':
+        void refreshSchedules();
         break;
 
       case 'toggle-route': {
