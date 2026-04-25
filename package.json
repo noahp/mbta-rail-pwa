@@ -9,11 +9,13 @@
     "preview": "vite preview",
     "lint": "biome check src/",
     "lint:fix": "biome check --write src/",
-    "format": "biome format --write src/"
+    "format": "biome format --write src/",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
     "lefthook": "^2.1.6",
+    "puppeteer-core": "^24.42.0",
     "typescript": "^5.4.5",
     "vite": "^5.4.0",
     "vite-plugin-pwa": "^0.20.5"

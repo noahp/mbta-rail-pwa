@@ -140,7 +140,7 @@ async function loadRouteData(routeId: string) {
 
   renderRoutes();
 
-  // Fetch predictions first — small payload, fast, unblocks the UI.
+  // Fetch predictions first - small payload, fast, unblocks the UI.
   try {
     await fetchPredictions(routeId);
     routeErrors.delete(routeId);

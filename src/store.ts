@@ -46,7 +46,7 @@ export function saveSchedCache(routeId: string, cache: PersistedSchedCache): voi
   try {
     localStorage.setItem(SCHED_KEY_PREFIX + routeId, JSON.stringify(cache));
   } catch {
-    // Quota exceeded — not critical, next load will re-fetch
+    // Quota exceeded - not critical, next load will re-fetch
   }
 }
 
