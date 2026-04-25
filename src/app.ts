@@ -290,9 +290,10 @@ function buildTripList(routeId: string): TripDisplay[] {
     const firstPred = preds[0];
     const originPred = ssPred ?? firstPred;
 
-    // For origin time, use prediction if available, else schedule first stop
+    // Use schedule for origin time: predictions only cover future stops, so the
+    // first prediction by stop_sequence is the *next* stop, not the origin.
     const originTime =
-      originPred?.attributes.departure_time ?? scheds[0]?.attributes.departure_time ?? null;
+      scheds[0]?.attributes.departure_time ?? originPred?.attributes.departure_time ?? null;
 
     // Skip trips with no active predictions and a past origin (fully completed)
     const hasActivePreds = preds.length > 0;
