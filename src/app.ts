@@ -122,18 +122,23 @@ export async function init() {
 
 async function loadRouteData(routeId: string) {
   loadingRoutes.add(routeId);
+
+  // Hydrate from localStorage for routes not preloaded at startup (non-favorites).
+  if (!schedCache.has(routeId)) {
+    const persisted = loadSchedCache(routeId);
+    if (persisted) {
+      schedCache.set(routeId, {
+        schedules: persisted.schedules,
+        trips: new Map(persisted.trips),
+        stops: new Map(persisted.stops),
+        date: persisted.date,
+      });
+    }
+  }
+
   renderRoutes();
 
-  const today = todayString();
-  const cached = schedCache.get(routeId);
-
-  // Start schedule fetch in the background if stale; don't await it yet.
-  const schedPromise =
-    cached?.date === today
-      ? Promise.resolve()
-      : fetchSchedules(routeId, today).then(() => renderRoutes());
-
-  // Await only predictions — they're fast and unblock the UI.
+  // Fetch predictions first — small payload, fast, unblocks the UI.
   try {
     await fetchPredictions(routeId);
     routeErrors.delete(routeId);
@@ -145,8 +150,14 @@ async function loadRouteData(routeId: string) {
   lastRefreshed = new Date();
   renderRoutes();
 
-  // Re-render once schedules arrive (fills in origin times).
-  schedPromise.catch(() => {});
+  // After rendering, fetch stale schedules in the background (large payload).
+  // Sequential (not concurrent) so it doesn't compete with the prediction request.
+  const today = todayString();
+  if (schedCache.get(routeId)?.date !== today) {
+    fetchSchedules(routeId, today)
+      .then(() => renderRoutes())
+      .catch(() => {});
+  }
 }
 
 async function fetchSchedules(routeId: string, date: string) {
@@ -158,12 +169,15 @@ async function fetchSchedules(routeId: string, date: string) {
     date,
   };
   schedCache.set(routeId, cache);
-  saveSchedCache(routeId, {
-    date: cache.date,
-    schedules: cache.schedules,
-    trips: [...cache.trips.entries()],
-    stops: [...cache.stops.entries()],
-  });
+  // Defer the localStorage write so JSON.stringify doesn't block the render cycle.
+  setTimeout(() => {
+    saveSchedCache(routeId, {
+      date: cache.date,
+      schedules: cache.schedules,
+      trips: [...cache.trips.entries()],
+      stops: [...cache.stops.entries()],
+    });
+  }, 0);
 }
 
 async function fetchPredictions(routeId: string) {
