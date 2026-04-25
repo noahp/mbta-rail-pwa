@@ -14,16 +14,94 @@
   --text-muted: #856694;
   --track-color: #d84315;
   --track-bg: #fbe9e7;
+  --track-border: #ffccbc;
   --gold: #f59e0b;
   --green: #16a34a;
   --red: #dc2626;
   --blue: #1d4ed8;
   --predicted-color: #1d4ed8;
+
+  --badge-success-bg: #dcfce7;
+  --badge-success-color: var(--green);
+  --badge-danger-bg: #fee2e2;
+  --badge-danger-color: var(--red);
+  --badge-warning-bg: #fef3c7;
+  --badge-warning-color: #92400e;
+
+  --sev-info: #60a5fa;
+  --sev-warning: #f59e0b;
+  --sev-severe: #ef4444;
+  --sev-info-bg: #eff6ff;
+  --sev-info-color: #1d4ed8;
+  --sev-warning-bg: #fffbeb;
+  --sev-warning-color: #92400e;
+  --sev-severe-bg: #fef2f2;
+  --sev-severe-color: #991b1b;
+
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+
+  --tab-bar-shadow: 0 -2px 10px rgba(80, 20, 100, 0.09);
+  --fav-card-shadow: 0 2px 8px rgba(123, 56, 140, 0.12);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --shadow-sm: 0 1px 3px rgba(80, 20, 100, 0.1);
   --shadow-md: 0 4px 12px rgba(80, 20, 100, 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --purple: #9b58ac;
+    --purple-mid: #864b97;
+    --purple-light: #b478c8;
+    --purple-xlight: #3d2150;
+    --purple-bg: #0e0814;
+    --surface: #1a1024;
+    --surface-raised: #251635;
+    --border: #3a2447;
+    --border-light: #2a1837;
+    --text: #f0e5fa;
+    --text-mid: #c0aad4;
+    --text-muted: #8c759f;
+
+    --green: #4ade80;
+    --red: #f87171;
+    --gold: #fbbf24;
+    --blue: #60a5fa;
+    --predicted-color: #60a5fa;
+
+    --track-color: #fb7c4d;
+    --track-bg: #2a1408;
+    --track-border: #4a2614;
+
+    --badge-success-bg: #143020;
+    --badge-success-color: #4ade80;
+    --badge-danger-bg: #3a1212;
+    --badge-danger-color: #f87171;
+    --badge-warning-bg: #2a1f08;
+    --badge-warning-color: #fbbf24;
+
+    --sev-info: #60a5fa;
+    --sev-warning: #fbbf24;
+    --sev-severe: #f87171;
+    --sev-info-bg: #122638;
+    --sev-info-color: #93c5fd;
+    --sev-warning-bg: #2a1f08;
+    --sev-warning-color: #fbbf24;
+    --sev-severe-bg: #3a1212;
+    --sev-severe-color: #fca5a5;
+
+    --error-bg: #2a0d0d;
+    --error-border: #4a1818;
+
+    --tab-bar-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+    --fav-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
 }
 
 *,
@@ -470,7 +548,7 @@ button {
 
 .route-card.is-favorite {
   border-color: var(--purple-xlight);
-  box-shadow: 0 2px 8px rgba(123, 56, 140, 0.12);
+  box-shadow: var(--fav-card-shadow);
 }
 
 .route-header {
@@ -561,10 +639,10 @@ button {
 
 .route-error {
   padding: 14px 16px;
-  background: #fef2f2;
+  background: var(--error-bg);
   color: var(--red);
   font-size: 0.82rem;
-  border-top: 1px solid #fecaca;
+  border-top: 1px solid var(--error-border);
 }
 
 /* ── Trip card ──────────────────────────────────────────── */
@@ -650,7 +728,7 @@ button {
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 20px;
-  border: 1px solid #ffccbc;
+  border: 1px solid var(--track-border);
   white-space: nowrap;
 }
 
@@ -662,16 +740,16 @@ button {
   white-space: nowrap;
 }
 .status-badge.on-time {
-  background: #dcfce7;
-  color: var(--green);
+  background: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 .status-badge.delayed {
-  background: #fee2e2;
-  color: var(--red);
+  background: var(--badge-danger-bg);
+  color: var(--badge-danger-color);
 }
 .status-badge.boarding {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-color);
 }
 .status-badge.other {
   background: var(--purple-xlight);
@@ -780,7 +858,7 @@ button {
   background: var(--track-bg);
   padding: 2px 6px;
   border-radius: 12px;
-  border: 1px solid #ffccbc;
+  border: 1px solid var(--track-border);
 }
 
 .stop-time-col {
@@ -848,7 +926,7 @@ button {
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 100;
-  box-shadow: 0 -2px 10px rgba(80, 20, 100, 0.09);
+  box-shadow: var(--tab-bar-shadow);
 }
 
 .tab-btn {
@@ -886,7 +964,7 @@ button {
   position: absolute;
   top: 5px;
   left: calc(50% + 6px);
-  background: #ef4444;
+  background: var(--red);
   color: white;
   font-size: 0.6rem;
   font-weight: 800;
@@ -954,13 +1032,13 @@ button {
   border-bottom: 1px solid var(--border-light);
 }
 .alert-card.sev-info {
-  border-left-color: #60a5fa;
+  border-left-color: var(--sev-info);
 }
 .alert-card.sev-warning {
-  border-left-color: #f59e0b;
+  border-left-color: var(--sev-warning);
 }
 .alert-card.sev-severe {
-  border-left-color: #ef4444;
+  border-left-color: var(--sev-severe);
 }
 
 .alert-top-row {
@@ -1005,16 +1083,16 @@ button {
   flex-shrink: 0;
 }
 .alert-effect-badge.sev-info {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--sev-info-bg);
+  color: var(--sev-info-color);
 }
 .alert-effect-badge.sev-warning {
-  background: #fffbeb;
-  color: #92400e;
+  background: var(--sev-warning-bg);
+  color: var(--sev-warning-color);
 }
 .alert-effect-badge.sev-severe {
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--sev-severe-bg);
+  color: var(--sev-severe-color);
 }
 
 .alert-header {
