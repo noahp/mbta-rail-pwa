@@ -6,6 +6,13 @@ alerts without opening the full MBTA site.
 
 **Live:** https://noahp.github.io/mbta-rail-pwa/
 
+## Screenshots
+
+<p>
+  <img src="screenshots/routes.png" alt="Route list" width="280">
+  <img src="screenshots/trains.png" alt="Live train predictions" width="280">
+</p>
+
 ## Features
 
 - **Favorite lines** - pinned to the top of the list
