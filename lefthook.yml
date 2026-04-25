@@ -2,5 +2,5 @@ pre-commit:
   commands:
     biome:
       glob: "*.{ts,js,css,json}"
-      run: npx biome check --write --no-errors-on-unmatched {staged_files}
+      run: yarn biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true

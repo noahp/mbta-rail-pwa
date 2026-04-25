@@ -18,8 +18,8 @@ export interface MbtaStop {
   attributes: {
     name: string;
     municipality: string;
-    platform_name: string | null;
-    platform_code: string | null;
+    platform_name?: string | null;
+    platform_code?: string | null;
   };
 }
 
@@ -43,7 +43,6 @@ export interface MbtaPrediction {
     schedule_relationship: string | null;
     status: string | null;
     stop_sequence: number | null;
-    track?: string | null;
   };
   relationships: {
     trip: { data: { id: string } | null };

@@ -24,8 +24,8 @@ alerts without opening the full MBTA site.
 No build step needed to run locally:
 
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 Open http://localhost:5173.
@@ -39,8 +39,8 @@ in-app settings.
 ## Build & deploy
 
 ```bash
-npm run build   # outputs to dist/
-npm run preview # preview the production build
+yarn build    # outputs to dist/
+yarn preview  # preview the production build
 ```
 
 Pushes to `main` automatically deploy to GitHub Pages via the included workflow.

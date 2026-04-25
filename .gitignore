@@ -3,3 +3,7 @@ dist/
 dev-dist/
 .DS_Store
 *.local
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz

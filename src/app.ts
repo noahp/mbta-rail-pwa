@@ -305,7 +305,11 @@ function buildTripList(routeId: string): TripDisplay[] {
       headsign: trip.attributes.headsign,
       directionId: trip.attributes.direction_id,
       originTime,
-      track: ssPred?.attributes.track ?? originPred?.attributes.track ?? null,
+      // Track comes from the prediction's child stop (platform_code), not prediction attributes
+      track: (() => {
+        const sid = ssPred?.relationships.stop.data?.id ?? originPred?.relationships.stop.data?.id;
+        return sid ? (stopMap.get(sid)?.attributes.platform_code ?? null) : null;
+      })(),
       status: originPred?.attributes.status ?? null,
       hasLiveData: preds.some((p) => p.attributes.status !== null),
     });
@@ -325,27 +329,31 @@ function buildStopList(tripId: string, routeId: string): StopTimeDisplay[] | nul
   if (!tripSched) return null;
 
   const pred = predCache.get(routeId);
-  const predByStop = new Map<string, MbtaPrediction>();
+  // Key by stop_sequence: more reliable than stop ID since a track reassignment
+  // means a different child stop ID on the prediction vs the schedule.
+  const predBySeq = new Map<number, MbtaPrediction>();
   if (pred) {
     for (const p of pred.predictions) {
       const tid = p.relationships.trip.data?.id;
-      const sid = p.relationships.stop.data?.id;
-      if (tid === tripId && sid) predByStop.set(sid, p);
+      const seq = p.attributes.stop_sequence;
+      if (tid === tripId && seq != null) predBySeq.set(seq, p);
     }
   }
 
   const favStops = new Set(prefs.favoriteStops[routeId] ?? []);
 
   return tripSched.stops.map((s) => {
-    const p = predByStop.get(s.stopId);
+    const p = predBySeq.get(s.sequence);
     const effectiveTime = p?.attributes.departure_time ?? s.scheduled;
+    const predStopId = p?.relationships.stop.data?.id;
+    const predStop = predStopId ? pred?.stops.get(predStopId) : undefined;
     return {
       stopId: s.stopId,
       stopName: s.stopName,
       sequence: s.sequence,
       scheduled: s.scheduled,
       predicted: p?.attributes.departure_time ?? null,
-      track: p?.attributes.track ?? null,
+      track: predStop?.attributes.platform_code ?? null,
       status: p?.attributes.status ?? null,
       isFavorite: favStops.has(s.stopId),
       isPast: isPast(effectiveTime),

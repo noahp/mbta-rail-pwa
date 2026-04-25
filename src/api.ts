@@ -56,7 +56,7 @@ export class MbtaApi {
       'fields[prediction]':
         'arrival_time,departure_time,direction_id,schedule_relationship,status,stop_sequence',
       'fields[trip]': 'headsign,name,direction_id',
-      'fields[stop]': 'name,municipality',
+      'fields[stop]': 'name,municipality,platform_code,platform_name',
     });
     const inc = r.included ?? [];
     return {
