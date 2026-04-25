@@ -8,10 +8,12 @@ alerts without opening the full MBTA site.
 
 ## Screenshots
 
-<p>
-  <img src="screenshots/routes.png" alt="Route list" width="280">
-  <img src="screenshots/trains.png" alt="Live train predictions" width="280">
-</p>
+<table>
+  <tr>
+    <td><img src="screenshots/routes.png" alt="Route list" width="280"></td>
+    <td><img src="screenshots/trains.png" alt="Live train predictions" width="280"></td>
+  </tr>
+</table>
 
 ## Features
 
