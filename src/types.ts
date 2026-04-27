@@ -71,6 +71,7 @@ export interface Prefs {
   apiKey: string;
   favoriteRoutes: string[];
   favoriteStops: Record<string, string[]>;
+  favoriteTrips: Record<string, string[]>; // routeId -> tripNames[]
   refreshInterval: number; // seconds
 }
 
@@ -83,6 +84,7 @@ export interface TripDisplay {
   track: string | null;
   status: string | null;
   hasLiveData: boolean;
+  isFavorite: boolean;
 }
 
 export interface MbtaAlert {

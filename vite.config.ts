@@ -25,7 +25,7 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png}'],
+        globPatterns: command === 'build' ? ['**/*.{js,css,html,svg,png}'] : [],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api-v3\.mbta\.com\//,

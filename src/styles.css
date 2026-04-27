@@ -653,6 +653,10 @@ button {
 .trip-card:last-child {
   border-bottom: none;
 }
+.trip-card.is-favorite {
+  border-left: 3px solid var(--purple-light);
+  background: var(--purple-bg);
+}
 
 .trip-header {
   display: flex;

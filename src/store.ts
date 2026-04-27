@@ -7,6 +7,7 @@ const defaults: Prefs = {
   apiKey: '',
   favoriteRoutes: [],
   favoriteStops: {},
+  favoriteTrips: {},
   refreshInterval: 10,
 };
 
@@ -15,7 +16,12 @@ export function loadPrefs(): Prefs {
     const raw = localStorage.getItem(PREFS_KEY);
     if (!raw) return { ...defaults, favoriteStops: {} };
     const parsed = JSON.parse(raw) as Partial<Prefs>;
-    return { ...defaults, ...parsed, favoriteStops: parsed.favoriteStops ?? {} };
+    return {
+      ...defaults,
+      ...parsed,
+      favoriteStops: parsed.favoriteStops ?? {},
+      favoriteTrips: parsed.favoriteTrips ?? {},
+    };
   } catch {
     return { ...defaults, favoriteStops: {} };
   }

@@ -362,9 +362,10 @@ function buildTripList(routeId: string): TripDisplay[] {
     const hasActivePreds = preds.length > 0;
     if (isPast(originTime) && !hasActivePreds) continue;
 
+    const tripName = trip.attributes.name;
     result.push({
       tripId,
-      tripName: trip.attributes.name,
+      tripName,
       headsign: trip.attributes.headsign,
       directionId: trip.attributes.direction_id,
       originTime,
@@ -375,11 +376,15 @@ function buildTripList(routeId: string): TripDisplay[] {
       })(),
       status: originPred?.attributes.status ?? null,
       hasLiveData: preds.some((p) => p.attributes.status !== null),
+      isFavorite: (prefs.favoriteTrips[routeId] ?? []).includes(tripName),
     });
   }
 
   return result
     .sort((a, b) => {
+      const aFav = a.isFavorite ? 0 : 1;
+      const bFav = b.isFavorite ? 0 : 1;
+      if (aFav !== bFav) return aFav - bFav;
       if (!a.originTime) return 1;
       if (!b.originTime) return -1;
       return new Date(a.originTime).getTime() - new Date(b.originTime).getTime();
@@ -517,7 +522,7 @@ function renderTripCard(trip: TripDisplay, routeId: string): string {
           : 'other';
 
   return `
-<div class="trip-card${isExpanded ? ' is-expanded' : ''}" data-trip-id="${escHtml(trip.tripId)}">
+<div class="trip-card${trip.isFavorite ? ' is-favorite' : ''}${isExpanded ? ' is-expanded' : ''}" data-trip-id="${escHtml(trip.tripId)}">
   <div class="trip-header" data-action="toggle-trip" data-trip="${escHtml(trip.tripId)}" data-route="${escHtml(routeId)}">
     <div class="trip-time-col">
       <div class="trip-time">${formatTime(trip.originTime)}</div>
@@ -532,6 +537,9 @@ function renderTripCard(trip: TripDisplay, routeId: string): string {
       ${trip.track ? `<span class="track-badge">Track ${escHtml(trip.track)}</span>` : ''}
       ${trip.status && statusClass ? `<span class="status-badge ${statusClass}">${escHtml(trip.status)}</span>` : ''}
     </div>
+    <button class="fav-btn${trip.isFavorite ? ' active' : ''}" data-action="toggle-fav-trip" data-route="${escHtml(routeId)}" data-trip-name="${escHtml(trip.tripName)}" aria-label="${trip.isFavorite ? 'Unfavorite train' : 'Favorite train'}">
+      ${trip.isFavorite ? '★' : '☆'}
+    </button>
     <svg class="trip-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <polyline points="6 9 12 15 18 9"/>
     </svg>
@@ -952,6 +960,20 @@ function attachDelegation() {
         const idx = list.indexOf(stopId);
         if (idx >= 0) list.splice(idx, 1);
         else list.push(stopId);
+        savePrefs(prefs);
+        renderRoutes();
+        break;
+      }
+
+      case 'toggle-fav-trip': {
+        e.stopPropagation();
+        const routeId = el.dataset.route!;
+        const tripName = el.dataset.tripName!;
+        if (!prefs.favoriteTrips[routeId]) prefs.favoriteTrips[routeId] = [];
+        const list = prefs.favoriteTrips[routeId];
+        const idx = list.indexOf(tripName);
+        if (idx >= 0) list.splice(idx, 1);
+        else list.unshift(tripName);
         savePrefs(prefs);
         renderRoutes();
         break;
