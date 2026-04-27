@@ -132,34 +132,6 @@ button {
   padding: 0;
 }
 
-/* ── Update banner ──────────────────────────────────────── */
-
-#update-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--purple-dark);
-  color: white;
-  padding: 10px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-#update-banner[hidden] {
-  display: none;
-}
-
-#update-apply {
-  background: white;
-  color: var(--purple-dark);
-  border-radius: 6px;
-  padding: 5px 14px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
 /* ── Header ─────────────────────────────────────────────── */
 
 .app-header {
@@ -274,6 +246,44 @@ button {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ── Direction filter ───────────────────────────────────── */
+
+#direction-filter:not(:empty) {
+  background: var(--purple-dark);
+  padding: 0 12px 8px;
+}
+
+.dir-filter-bar {
+  display: flex;
+  gap: 6px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.dir-btn {
+  flex: 1;
+  padding: 5px 4px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  background: transparent;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    color 0.15s;
+}
+.dir-btn:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+.dir-btn.active {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 /* ── Settings overlay ───────────────────────────────────── */

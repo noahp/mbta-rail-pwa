@@ -64,6 +64,7 @@ let isRefreshing = false;
 let schedRefreshing = false;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let activeTab: 'trains' | 'alerts' = 'trains';
+let directionFilter: number | null;
 let alertCache: MbtaAlert[] = [];
 let alertsError = '';
 
@@ -71,6 +72,7 @@ let alertsError = '';
 
 export async function init() {
   prefs = loadPrefs();
+  directionFilter = prefs.directionFilter;
   api.setApiKey(prefs.apiKey);
 
   // Preload persisted schedule caches for favorited routes so first render
@@ -90,6 +92,7 @@ export async function init() {
   attachDelegation();
   renderSettings();
   renderStatus();
+  renderDirectionFilter();
 
   try {
     routes = await api.getCommuterRailRoutes();
@@ -381,6 +384,7 @@ function buildTripList(routeId: string): TripDisplay[] {
   }
 
   return result
+    .filter((t) => directionFilter === null || t.directionId === directionFilter)
     .sort((a, b) => {
       const aFav = a.isFavorite ? 0 : 1;
       const bFav = b.isFavorite ? 0 : 1;
@@ -434,6 +438,22 @@ function isSouthOrNorthStation(name: string): boolean {
 }
 
 // ── Rendering ──────────────────────────────────────────────────────────────
+
+function renderDirectionFilter() {
+  const el = document.getElementById('direction-filter');
+  if (!el) return;
+  const opts: Array<{ label: string; dir: string }> = [
+    { label: 'All', dir: '' },
+    { label: 'Outbound', dir: '0' },
+    { label: 'Inbound', dir: '1' },
+  ];
+  el.innerHTML = `<div class="dir-filter-bar">${opts
+    .map(({ label, dir }) => {
+      const active = dir === '' ? directionFilter === null : directionFilter === parseInt(dir, 10);
+      return `<button class="dir-btn${active ? ' active' : ''}" data-action="set-direction" data-dir="${dir}">${label}</button>`;
+    })
+    .join('')}</div>`;
+}
 
 function renderRoutes() {
   const container = document.getElementById('routes-container');
@@ -985,6 +1005,16 @@ function attachDelegation() {
         savePrefs(prefs);
         restartPolling();
         renderSettings();
+        break;
+      }
+
+      case 'set-direction': {
+        const dir = el.dataset.dir ?? '';
+        directionFilter = dir === '' ? null : parseInt(dir, 10);
+        prefs.directionFilter = directionFilter;
+        savePrefs(prefs);
+        renderDirectionFilter();
+        renderRoutes();
         break;
       }
 

@@ -5,13 +5,4 @@ import { init } from './app';
 
 init().catch(console.error);
 
-const updateSW = registerSW({
-  onNeedRefresh() {
-    const banner = document.getElementById('update-banner');
-    if (banner) banner.hidden = false;
-  },
-});
-
-document.getElementById('update-apply')?.addEventListener('click', () => {
-  void updateSW(true);
-});
+registerSW({ onOfflineReady() {} });
