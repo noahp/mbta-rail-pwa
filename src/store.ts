@@ -9,7 +9,6 @@ const defaults: Prefs = {
   favoriteStops: {},
   favoriteTrips: {},
   refreshInterval: 10,
-  directionFilter: null,
 };
 
 export function loadPrefs(): Prefs {

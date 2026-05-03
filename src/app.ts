@@ -72,7 +72,8 @@ let alertsError = '';
 
 export async function init() {
   prefs = loadPrefs();
-  directionFilter = prefs.directionFilter;
+  const hour = new Date().getHours();
+  directionFilter = hour < 12 ? 1 : 0; // inbound AM, outbound PM
   api.setApiKey(prefs.apiKey);
 
   // Preload persisted schedule caches for favorited routes so first render
@@ -1011,8 +1012,6 @@ function attachDelegation() {
       case 'set-direction': {
         const dir = el.dataset.dir ?? '';
         directionFilter = dir === '' ? null : parseInt(dir, 10);
-        prefs.directionFilter = directionFilter;
-        savePrefs(prefs);
         renderDirectionFilter();
         renderRoutes();
         break;

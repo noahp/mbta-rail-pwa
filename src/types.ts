@@ -73,7 +73,6 @@ export interface Prefs {
   favoriteStops: Record<string, string[]>;
   favoriteTrips: Record<string, string[]>; // routeId -> tripNames[]
   refreshInterval: number; // seconds
-  directionFilter: number | null;
 }
 
 export interface TripDisplay {
