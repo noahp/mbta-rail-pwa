@@ -1,8 +1,21 @@
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+function gitSha() {
+  try {
+    return execSync('git rev-parse HEAD').toString().trim();
+  } catch {
+    return 'unknown';
+  }
+}
+
 export default defineConfig(({ command }) => ({
   base: command === 'build' && process.env.GITHUB_ACTIONS ? '/mbta-rail-pwa/' : '/',
+  define: {
+    __BUILD_SHA__: JSON.stringify(gitSha()),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',

@@ -492,12 +492,26 @@ button {
   color: var(--purple);
 }
 
+.build-version {
+  display: block;
+  margin-top: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.build-version:hover {
+  color: var(--text);
+}
+
 .github-link {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  margin-top: 20px;
+  margin-top: 8px;
   color: var(--text-muted);
   font-size: 0.8rem;
   text-decoration: none;
