@@ -109,9 +109,27 @@ export async function init() {
 
   // Load data for expanded routes + initial alerts in parallel
   await Promise.all([...[...expandedRoutes].map(loadRouteData), fetchAlerts()]);
+
+  // Auto-expand favorited trips now that route data is loaded
+  const autoExpandedTripIds: string[] = [];
+  for (const routeId of prefs.favoriteRoutes) {
+    const favNames = new Set(prefs.favoriteTrips[routeId] ?? []);
+    if (favNames.size === 0) continue;
+    for (const trip of buildTripList(routeId)) {
+      if (favNames.has(trip.tripName)) {
+        expandedTrips.add(trip.tripId);
+        autoExpandedTripIds.push(trip.tripId);
+      }
+    }
+  }
+
   renderRoutes();
   renderStatus();
   renderTabBar();
+
+  // Load stop-level schedules for auto-expanded trips
+  await Promise.all(autoExpandedTripIds.map(loadTripSchedule));
+  if (autoExpandedTripIds.length > 0) renderRoutes();
 
   startPolling();
 
